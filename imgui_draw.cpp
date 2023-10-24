@@ -31,6 +31,7 @@ Index of this file:
 #endif
 
 #include "imgui.h"
+#include "imgui_spectrum.h"
 #ifndef IMGUI_DISABLE
 #include "imgui_internal.h"
 #ifdef IMGUI_ENABLE_FREETYPE

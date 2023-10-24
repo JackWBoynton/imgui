@@ -71,7 +71,8 @@ int main(int, char**)
     io.IniFilename = nullptr;
 
     // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
+    // ImGui::StyleColorsDark();
+    ImGui::Spectrum::StyleColorsSpectrum();
     //ImGui::StyleColorsLight();
 
     // Setup Platform/Renderer backends

@@ -1,3 +1,5 @@
+for information on ImGui-Spectrum check [Spectrum.md](Spectrum.md). Original ImGui readme follows.
+
 Dear ImGui
 =====
 
