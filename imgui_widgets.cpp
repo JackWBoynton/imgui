@@ -6665,7 +6665,7 @@ bool ImGui::Selectable(const char* label, bool selected, ImGuiSelectableFlags fl
 
         if (hovered) {
             RenderFrame(bb.Min, bb.Max, Spectrum::color_alpha(0x0A, Spectrum::Static::GRAY900), false, 0.0f);
-            RenderNavHighlight(bb, id, ImGuiNavHighlightFlags_TypeThin | ImGuiNavHighlightFlags_NoRounding);
+            RenderNavHighlight(bb, id, ImGuiNavHighlightFlags_Compact | ImGuiNavHighlightFlags_NoRounding);
         }
 
         if (selected) { // add a checkmark and text is blue
