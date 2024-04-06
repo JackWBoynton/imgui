@@ -175,6 +175,7 @@ namespace ImGui {
         const unsigned int GREEN500 = Color(0x33AB84);
         const unsigned int GREEN600 = Color(0x39B990);
         const unsigned int GREEN700 = Color(0x3FC89C);
+        const unsigned int INDIGO300 = Color(0x4D4DFF);
         const unsigned int INDIGO400 = Color(0x6767EC);
         const unsigned int INDIGO500 = Color(0x7575F1);
         const unsigned int INDIGO600 = Color(0x8282F6);
