@@ -19,7 +19,7 @@
 // #define IM_ASSERT(_EXPR)  MyAssert(_EXPR)
 // #define IM_ASSERT(_EXPR)  ((void)(_EXPR))     // Disable asserts
 
-#if defined DEBUG
+#if defined DEBUG && !defined INSTRONIMBUS_OS_WEB
 
 static inline void my_assert(const char* expression, const char* file, int line) {
         (void)expression;
