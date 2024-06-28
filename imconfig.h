@@ -21,18 +21,16 @@
 
 #if defined DEBUG && !defined INSTRONIMBUS_OS_WEB
 
-static inline void my_assert(const char* expression, const char* file, int line) {
-        (void)expression;
-        (void)file;
-        (void)line;
-        // trigger a breakpoint in the debugger
-__asm__("int $3");
-}
-
-// make breakpoint on assert
-#define IM_ASSERT(_EXPR) ((_EXPR) ? (void)0 : my_assert(#_EXPR, __FILE__, __LINE__))
-
-#endif
+#ifdef _MSC_VER
+    #define IM_ASSERT(_EXPR)  do { if (!(_EXPR)) { __debugbreak(); } } while (false)
+#elif defined(__i386__) || defined(__x86_64__)
+    #define IM_ASSERT(_EXPR)  do { if (!(_EXPR)) { __asm__("int $3"); } } while (false)
+#elif defined(__aarch64__)
+    #define IM_ASSERT(_EXPR)  do { if (!(_EXPR)) { __asm__("brk #0"); } } while (false)
+#else
+    #include <signal.h>
+    #define IM_ASSERT(_EXPR)  do { if (!(_EXPR)) { raise(SIGTRAP); } } while (false)
+#endif#endif
 //---- Define attributes of all API symbols declarations, e.g. for DLL under Windows
 // Using Dear ImGui via a shared library is not recommended, because of function call overhead and because we don't guarantee backward nor forward ABI
 // compatibility. DLL users: heaps and globals are not shared across DLL boundaries! You will need to call SetCurrentContext() + SetAllocatorFunctions() for
