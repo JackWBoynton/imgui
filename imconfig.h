@@ -45,7 +45,8 @@
   do {                                \
     if (!(_EXPR)) { raise(SIGTRAP); } \
   } while (false)
-#endif #endif
+#endif
+#endif
 //---- Define attributes of all API symbols declarations, e.g. for DLL under Windows
 // Using Dear ImGui via a shared library is not recommended, because of function call overhead and because we don't
 // guarantee backward nor forward ABI compatibility. DLL users: heaps and globals are not shared across DLL boundaries!
