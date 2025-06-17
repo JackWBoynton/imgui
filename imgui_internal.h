@@ -3371,6 +3371,21 @@ struct ImGuiTableSettings
     ImGuiTableColumnSettings*   GetColumnSettings()     { return (ImGuiTableColumnSettings*)(this + 1); }
 };
 
+struct ImGuiDockNodeSettings
+{
+    ImGuiID             ID;
+    ImGuiID             ParentNodeId;
+    ImGuiID             ParentWindowId;
+    ImGuiID             SelectedTabId;
+    signed char         SplitAxis;
+    char                Depth;
+    ImGuiDockNodeFlags  Flags;                  // NB: We save individual flags one by one in ascii format (ImGuiDockNodeFlags_SavedFlagsMask_)
+    ImVec2ih            Pos;
+    ImVec2ih            Size;
+    ImVec2ih            SizeRef;
+    ImGuiDockNodeSettings() { memset(this, 0, sizeof(*this)); SplitAxis = ImGuiAxis_None; }
+};
+
 //-----------------------------------------------------------------------------
 // [SECTION] ImGui internal API
 // No guarantee of forward compatibility here!
@@ -4040,6 +4055,18 @@ namespace ImGui
     IMGUI_API void          DebugNodePlatformMonitor(ImGuiPlatformMonitor* monitor, const char* label, int idx);
     IMGUI_API void          DebugRenderKeyboardPreview(ImDrawList* draw_list);
     IMGUI_API void          DebugRenderViewportThumbnail(ImDrawList* draw_list, ImGuiViewportP* viewport, const ImRect& bb);
+
+    // Custom InstroNimbus exposed API
+    IMGUI_API void          DockContextBuildNodesFromSettings(ImGuiContext* ctx, ImGuiDockNodeSettings* node_settings_array, int node_settings_count);
+    IMGUI_API void          DockContextBuildAddWindowsToNodes(ImGuiContext* ctx, ImGuiID root_id);                            // Use root_id==0 to add all
+    IMGUI_API ImGuiDockNodeSettings* DockSettingsFindNodeSettings(ImGuiContext* ctx, ImGuiID node_id);
+
+    IMGUI_API void          DockSettingsHandler_ClearAll(ImGuiContext* ctx, ImGuiSettingsHandler*);
+    IMGUI_API void          DockSettingsHandler_ApplyAll(ImGuiContext* ctx, ImGuiSettingsHandler*);
+    IMGUI_API void*         DockSettingsHandler_ReadOpen(ImGuiContext*, ImGuiSettingsHandler*, const char* name);
+    IMGUI_API void          DockSettingsHandler_ReadLine(ImGuiContext* ctx, ImGuiSettingsHandler*, void*, const char* line);
+    IMGUI_API void          DockSettingsHandler_DockNodeToSettings(ImGuiDockContext* dc, ImGuiDockNode* node, int depth);
+    IMGUI_API void          DockSettingsHandler_WriteAll(ImGuiContext* ctx, ImGuiSettingsHandler* handler, ImGuiTextBuffer* buf);
 
     // Obsolete functions
 #ifndef IMGUI_DISABLE_OBSOLETE_FUNCTIONS
