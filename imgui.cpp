@@ -17628,7 +17628,7 @@ struct ImGuiDockPreviewData
 namespace ImGui
 {
     // ImGuiDockContext
-    static ImGuiDockNode*   DockContextAddNode(ImGuiContext* ctx, ImGuiID id);
+    static ImGuiDockNode*   DockContextAddNode(ImGuiContext* ctx, ImGuiID id, ImGuiID parent_id);
     static void             DockContextRemoveNode(ImGuiContext* ctx, ImGuiDockNode* node, bool merge_sibling_into_parent_node);
     static void             DockContextDeleteNode(ImGuiContext* ctx, ImGuiDockNode* node);
     static void             DockContextQueueNotifyRemovedNode(ImGuiContext* ctx, ImGuiDockNode* node);
@@ -17861,25 +17861,27 @@ ImGuiDockNode* ImGui::DockContextFindNodeByID(ImGuiContext* ctx, ImGuiID id)
     return (ImGuiDockNode*)ctx->DockContext.Nodes.GetVoidPtr(id);
 }
 
-ImGuiID ImGui::DockContextGenNodeID(ImGuiContext* ctx)
+ImGuiID ImGui::DockContextGenNodeID(ImGuiContext* ctx, ImGuiID parent_id)
 {
     // Generate an ID for new node (the exact ID value doesn't matter as long as it is not already used)
     // FIXME-OPT FIXME-DOCK: This is suboptimal, even if the node count is small enough not to be a worry.0
     // We should poke in ctx->Nodes to find a suitable ID faster. Even more so trivial that ctx->Nodes lookup is already sorted.
-    ImGuiID id = 0x0001;
-    while (DockContextFindNodeByID(ctx, id) != NULL)
-        id++;
-    return id;
+    while (DockContextFindNodeByID(ctx, parent_id) != NULL)
+        parent_id++;
+    return parent_id;
 }
 
-static ImGuiDockNode* ImGui::DockContextAddNode(ImGuiContext* ctx, ImGuiID id)
+static ImGuiDockNode* ImGui::DockContextAddNode(ImGuiContext* ctx, ImGuiID id, ImGuiID parent_id)
 {
     // Generate an ID for the new node (the exact ID value doesn't matter as long as it is not already used) and add the first window.
     ImGuiContext& g = *ctx;
     if (id == 0)
-        id = DockContextGenNodeID(ctx);
-    else
-        IM_ASSERT(DockContextFindNodeByID(ctx, id) == NULL);
+        id = DockContextGenNodeID(ctx, parent_id);
+
+    ImGuiDockNode *existing = DockContextFindNodeByID(ctx, id);
+    if (existing) {
+        return existing;
+    }
 
     // We don't set node->LastFrameAlive on construction. Nodes are always created at all time to reflect .ini settings!
     IMGUI_DEBUG_LOG_DOCKING("[docking] DockContextAddNode 0x%08X\n", id);
@@ -18034,7 +18036,7 @@ void ImGui::DockContextBuildNodesFromSettings(ImGuiContext* ctx, ImGuiDockNodeSe
             IMGUI_DEBUG_LOG_DOCKING("[docking] DockContextBuildNodesFromSettings: skip duplicate node 0x%08X\n", settings->ID);
             continue;
         }
-        ImGuiDockNode* node = DockContextAddNode(ctx, settings->ID);
+        ImGuiDockNode* node = DockContextAddNode(ctx, settings->ID, settings->ParentWindowId);
         node->ParentNode = settings->ParentNodeId ? DockContextFindNodeByID(ctx, settings->ParentNodeId) : NULL;
         node->Pos = ImVec2(settings->Pos.x, settings->Pos.y);
         node->Size = ImVec2(settings->Size.x, settings->Size.y);
@@ -18164,7 +18166,7 @@ void ImGui::DockContextProcessDock(ImGuiContext* ctx, ImGuiDockRequest* req)
     // Create new node and add existing window to it
     if (node == NULL)
     {
-        node = DockContextAddNode(ctx, 0);
+        node = DockContextAddNode(ctx, 0, target_window->ID);
         node->Pos = target_window->Pos;
         node->Size = target_window->Size;
         if (target_window->DockNodeAsHost == NULL)
@@ -18312,7 +18314,7 @@ void ImGui::DockContextProcessUndockNode(ImGuiContext* ctx, ImGuiDockNode* node)
     if (node->IsRootNode() || node->IsCentralNode())
     {
         // In the case of a root node or central node, the node will have to stay in place. Create a new node to receive the payload.
-        ImGuiDockNode* new_node = DockContextAddNode(ctx, 0);
+        ImGuiDockNode* new_node = DockContextAddNode(ctx, 0, node->ParentNode ? node->ParentNode->ID : 0);
         new_node->Pos = node->Pos;
         new_node->Size = node->Size;
         new_node->SizeRef = node->SizeRef;
@@ -19952,10 +19954,10 @@ void ImGui::DockNodeTreeSplit(ImGuiContext* ctx, ImGuiDockNode* parent_node, ImG
     ImGuiContext& g = *GImGui;
     IM_ASSERT(split_axis != ImGuiAxis_None);
 
-    ImGuiDockNode* child_0 = (new_node && split_inheritor_child_idx != 0) ? new_node : DockContextAddNode(ctx, 0);
+    ImGuiDockNode* child_0 = (new_node && split_inheritor_child_idx != 0) ? new_node : DockContextAddNode(ctx, 0, parent_node ? parent_node->ID : 0);
     child_0->ParentNode = parent_node;
 
-    ImGuiDockNode* child_1 = (new_node && split_inheritor_child_idx != 1) ? new_node : DockContextAddNode(ctx, 0);
+    ImGuiDockNode* child_1 = (new_node && split_inheritor_child_idx != 1) ? new_node : DockContextAddNode(ctx, 0, parent_node ? parent_node->ID : 0);
     child_1->ParentNode = parent_node;
 
     ImGuiDockNode* child_inheritor = (split_inheritor_child_idx == 0) ? child_0 : child_1;
@@ -20372,7 +20374,7 @@ ImGuiID ImGui::DockSpace(ImGuiID dockspace_id, const ImVec2& size_arg, ImGuiDock
     if (node == NULL)
     {
         IMGUI_DEBUG_LOG_DOCKING("[docking] DockSpace: dockspace node 0x%08X created\n", dockspace_id);
-        node = DockContextAddNode(&g, dockspace_id);
+        node = DockContextAddNode(&g, dockspace_id, window->ID);
         node->SetLocalFlags(ImGuiDockNodeFlags_CentralNode);
     }
     if (window_class && window_class->ClassId != node->WindowClass.ClassId)
@@ -20598,7 +20600,7 @@ ImGuiID ImGui::DockBuilderAddNode(ImGuiID node_id, ImGuiDockNodeFlags flags)
     }
     else
     {
-        node = DockContextAddNode(&g, node_id);
+        node = DockContextAddNode(&g, node_id, 0);
         node->SetLocalFlags(flags);
     }
     node->LastFrameAlive = g.FrameCount;   // Set this otherwise BeginDocked will undock during the same frame.
@@ -20767,7 +20769,7 @@ ImGuiID ImGui::DockBuilderSplitNode(ImGuiID id, ImGuiDir split_dir, float size_r
 static ImGuiDockNode* DockBuilderCopyNodeRec(ImGuiDockNode* src_node, ImGuiID dst_node_id_if_known, ImVector<ImGuiID>* out_node_remap_pairs)
 {
     ImGuiContext& g = *GImGui;
-    ImGuiDockNode* dst_node = ImGui::DockContextAddNode(&g, dst_node_id_if_known);
+    ImGuiDockNode* dst_node = ImGui::DockContextAddNode(&g, dst_node_id_if_known, src_node ? src_node->HostWindow->ID : 0);
     dst_node->SharedFlags = src_node->SharedFlags;
     dst_node->LocalFlags = src_node->LocalFlags;
     dst_node->LocalFlagsInWindows = ImGuiDockNodeFlags_None;
@@ -20966,7 +20968,7 @@ static ImGuiDockNode* ImGui::DockContextBindNodeToWindow(ImGuiContext* ctx, ImGu
     // Create node
     if (node == NULL)
     {
-        node = DockContextAddNode(ctx, window->DockId);
+        node = DockContextAddNode(ctx, window->DockId, window->ID);
         node->AuthorityForPos = node->AuthorityForSize = node->AuthorityForViewport = ImGuiDataAuthority_Window;
         node->LastFrameAlive = g.FrameCount;
     }
@@ -21017,7 +21019,7 @@ void ImGui::BeginDocked(ImGuiWindow* window, bool* p_open)
         if (window->DockId == 0)
         {
             IM_ASSERT(window->DockNode == NULL);
-            window->DockId = DockContextGenNodeID(&g);
+            window->DockId = DockContextGenNodeID(&g, window->ID);
         }
     }
     else
