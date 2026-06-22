@@ -26,30 +26,33 @@
   IMGUI_BUILD_DX11_BINDING ? false,
   IMGUI_BUILD_DX12_BINDING ? false,
 
-  IMGUI_BUILD_GLFW_BINDING ? !stdenv.hostPlatform.isDarwin,
+  # Old Conan package built GLFW on macOS too.
+  IMGUI_BUILD_GLFW_BINDING ? !stdenv.hostPlatform.isAndroid,
   IMGUI_BUILD_GLUT_BINDING ? false,
   IMGUI_BUILD_METAL_BINDING ? stdenv.hostPlatform.isDarwin,
 
   IMGUI_BUILD_SDL2_BINDING ? false,
   IMGUI_BUILD_SDL2_RENDERER_BINDING ? false,
 
-  IMGUI_BUILD_SDL3_BINDING ? !IMGUI_BUILD_GLFW_BINDING && !stdenv.hostPlatform.isDarwin,
+  IMGUI_BUILD_SDL3_BINDING ? false,
   IMGUI_BUILD_SDL3_RENDERER_BINDING ? IMGUI_BUILD_SDL3_BINDING,
   IMGUI_BUILD_SDLGPU3_BINDING ?
     IMGUI_BUILD_SDL3_BINDING && lib.versionAtLeast IMGUI_UPSTREAM_VERSION "1.91.8",
 
   IMGUI_BUILD_OPENGL2_BINDING ? false,
   IMGUI_BUILD_OPENGL3_BINDING ?
-    IMGUI_BUILD_SDL3_BINDING || IMGUI_BUILD_GLFW_BINDING || IMGUI_BUILD_GLUT_BINDING,
+    !stdenv.hostPlatform.isDarwin
+    && (IMGUI_BUILD_SDL3_BINDING || IMGUI_BUILD_GLFW_BINDING || IMGUI_BUILD_GLUT_BINDING),
 
-  IMGUI_BUILD_OSX_BINDING ? stdenv.hostPlatform.isDarwin,
+  IMGUI_BUILD_OSX_BINDING ? false,
   IMGUI_BUILD_VULKAN_BINDING ? false,
   IMGUI_BUILD_WIN32_BINDING ? false,
 
-  IMGUI_FREETYPE ? false,
-  IMGUI_FREETYPE_LUNASVG ? false,
-  IMGUI_USE_WCHAR32 ? false,
+  # SVG path uses imgui_freetype.cpp too, so SVG implies FreeType.
   IMGUI_FREETYPE_SVG ? true,
+  IMGUI_FREETYPE ? IMGUI_FREETYPE_SVG,
+  IMGUI_FREETYPE_LUNASVG ? false,
+  IMGUI_USE_WCHAR32 ? true,
 
   IMGUI_LINK_GLVND ?
     !stdenv.hostPlatform.isWindows
@@ -82,10 +85,8 @@ stdenv.mkDerivation {
       vulkan-headers
       vulkan-loader
     ]
-    ++ lib.optionals IMGUI_FREETYPE_SVG [
-      freetype
-      plutosvg
-    ];
+    ++ lib.optionals (IMGUI_FREETYPE || IMGUI_FREETYPE_SVG) [ freetype ]
+    ++ lib.optionals IMGUI_FREETYPE_SVG [ plutosvg ];
 
   cmakeFlags = [
     (lib.cmakeBool "IMGUI_BUILD_ALLEGRO5_BINDING" IMGUI_BUILD_ALLEGRO5_BINDING)
@@ -124,7 +125,6 @@ stdenv.mkDerivation {
     broken =
       IMGUI_BUILD_SDL2_BINDING
       || IMGUI_BUILD_SDL2_RENDERER_BINDING
-      || IMGUI_FREETYPE
       || IMGUI_FREETYPE_LUNASVG
       || IMGUI_BUILD_DX9_BINDING
       || IMGUI_BUILD_DX10_BINDING
