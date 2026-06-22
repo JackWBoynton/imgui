@@ -46,6 +46,7 @@
   IMGUI_FREETYPE ? false,
   IMGUI_FREETYPE_LUNASVG ? false,
   IMGUI_USE_WCHAR32 ? false,
+  IMGUI_FREETYPE_SVG ? true,
 
   IMGUI_LINK_GLVND ?
     !stdenv.hostPlatform.isWindows
@@ -109,6 +110,7 @@ stdenv.mkDerivation {
     (lib.cmakeBool "IMGUI_FREETYPE" IMGUI_FREETYPE)
     (lib.cmakeBool "IMGUI_FREETYPE_LUNASVG" IMGUI_FREETYPE_LUNASVG)
     (lib.cmakeBool "IMGUI_USE_WCHAR32" IMGUI_USE_WCHAR32)
+    (lib.cmakeBool "IMGUI_FREETYPE_SVG" IMGUI_FREETYPE_SVG)
   ];
 
   meta = {
