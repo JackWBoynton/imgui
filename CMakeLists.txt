@@ -333,6 +333,17 @@ if(NOT IMGUI_SKIP_HEADERS)
     endif()
 endif()
 
+set(IMGUI_CONFIG_FIND_DEPS "")
+if(IMGUI_FREETYPE OR IMGUI_FREETYPE_SVG)
+    string(APPEND IMGUI_CONFIG_FIND_DEPS "find_dependency(Freetype MODULE)\n")
+endif()
+if(IMGUI_FREETYPE_SVG)
+    string(APPEND IMGUI_CONFIG_FIND_DEPS "find_dependency(plutosvg CONFIG)\n")
+endif()
+if(IMGUI_BUILD_GLFW_BINDING)
+    string(APPEND IMGUI_CONFIG_FIND_DEPS "find_dependency(glfw3 CONFIG)\n")
+endif()
+
 include(CMakePackageConfigHelpers)
 configure_package_config_file(imgui-config.cmake.in imgui-config.cmake INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 
