@@ -344,7 +344,7 @@ if(IMGUI_BUILD_GLFW_BINDING)
     string(APPEND IMGUI_CONFIG_FIND_DEPS "find_dependency(glfw3 CONFIG)\n")
 endif()
 if (IMGUI_BUILD_VULKAN_BINDING)
-    string(APPEND IMGUI_CONFIG_FIND_DEPS "find_dependency(Vulkan CONFIG)\n")
+    string(APPEND IMGUI_CONFIG_FIND_DEPS "find_dependency(Vulkan)\n")
 endif()
 
 include(CMakePackageConfigHelpers)
