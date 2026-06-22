@@ -146,7 +146,7 @@ if(IMGUI_BUILD_WEBGPU_BINDING)
     endif()
 endif()
 
-if(IMGUI_FREETYPE)
+if(IMGUI_FREETYPE OR IMGUI_FREETYPE_SVG)
     find_package(freetype CONFIG REQUIRED)
     target_link_libraries(${PROJECT_NAME} PUBLIC freetype)
     target_sources(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/misc/freetype/imgui_freetype.cpp)
