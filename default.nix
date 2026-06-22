@@ -7,6 +7,9 @@
   cmake ? pkgs.cmake,
   ninja ? pkgs.ninja,
 
+  freetype ? pkgs.freetype or null,
+  plutosvg ? pkgs.plutosvg or null,
+
   glfw ? pkgs.glfw or null,
   libGL ? pkgs.libGL or null,
   SDL2 ? pkgs.SDL2 or null,
@@ -78,6 +81,10 @@ stdenv.mkDerivation {
     ++ lib.optionals IMGUI_BUILD_VULKAN_BINDING [
       vulkan-headers
       vulkan-loader
+    ]
+    ++ lib.optionals IMGUI_FREETYPE_SVG [
+      freetype
+      plutosvg
     ];
 
   cmakeFlags = [
