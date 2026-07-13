@@ -62,6 +62,7 @@ if(IMGUI_BUILD_GLFW_BINDING)
         target_link_libraries(${PROJECT_NAME} PUBLIC glfw)
     endif()
     target_sources(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/backends/imgui_impl_glfw.cpp)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_INCLUDE_NONE)
 endif()
 
 if(IMGUI_BUILD_GLUT_BINDING)
