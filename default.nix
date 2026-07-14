@@ -76,7 +76,7 @@ stdenv.mkDerivation {
   nativeBuildInputs = [
     cmake
     ninja
-  ];
+  ] ++ lib.optionals IMGUI_TEST_ENGINE [ stb ];
 
   propagatedBuildInputs =
     lib.optionals IMGUI_LINK_GLVND [ libGL ]
@@ -88,8 +88,7 @@ stdenv.mkDerivation {
       vulkan-loader
     ]
     ++ lib.optionals (IMGUI_FREETYPE || IMGUI_FREETYPE_SVG) [ freetype ]
-    ++ lib.optionals IMGUI_FREETYPE_SVG [ plutosvg ]
-    ++ lib.optionals IMGUI_TEST_ENGINE [ stb ];
+    ++ lib.optionals IMGUI_FREETYPE_SVG [ plutosvg ];
 
   cmakeFlags = [
     (lib.cmakeBool "IMGUI_BUILD_ALLEGRO5_BINDING" IMGUI_BUILD_ALLEGRO5_BINDING)
