@@ -9,7 +9,6 @@
 
   freetype ? pkgs.freetype or null,
   plutosvg ? pkgs.plutosvg or null,
-  stb ? pkgs.stb or null,
 
   glfw ? pkgs.glfw or null,
   libGL ? pkgs.libGL or null,
@@ -54,7 +53,6 @@
   IMGUI_FREETYPE ? IMGUI_FREETYPE_SVG,
   IMGUI_FREETYPE_LUNASVG ? false,
   IMGUI_USE_WCHAR32 ? true,
-  IMGUI_TEST_ENGINE ? false,
 
   IMGUI_LINK_GLVND ?
     !stdenv.hostPlatform.isWindows
@@ -77,8 +75,6 @@ stdenv.mkDerivation {
     cmake
     ninja
   ];
-
-  buildInputs = lib.optionals IMGUI_TEST_ENGINE [ stb ];
 
   propagatedBuildInputs =
     lib.optionals IMGUI_LINK_GLVND [ libGL ]
@@ -123,7 +119,6 @@ stdenv.mkDerivation {
     (lib.cmakeBool "IMGUI_FREETYPE_LUNASVG" IMGUI_FREETYPE_LUNASVG)
     (lib.cmakeBool "IMGUI_USE_WCHAR32" IMGUI_USE_WCHAR32)
     (lib.cmakeBool "IMGUI_FREETYPE_SVG" IMGUI_FREETYPE_SVG)
-    (lib.cmakeBool "IMGUI_TEST_ENGINE" IMGUI_TEST_ENGINE)
   ];
 
   meta = {
