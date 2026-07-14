@@ -76,7 +76,9 @@ stdenv.mkDerivation {
   nativeBuildInputs = [
     cmake
     ninja
-  ] ++ lib.optionals IMGUI_TEST_ENGINE [ stb ];
+  ];
+
+  buildInputs = lib.optionals IMGUI_TEST_ENGINE [ stb ];
 
   propagatedBuildInputs =
     lib.optionals IMGUI_LINK_GLVND [ libGL ]
