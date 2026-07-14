@@ -172,18 +172,71 @@ endif()
 
 if(IMGUI_TEST_ENGINE)
     find_package(Stb REQUIRED)
-    target_include_directories(${PROJECT_NAME} PRIVATE ${Stb_INCLUDE_DIR})
-    target_sources(
-        ${PROJECT_NAME}
+
+    add_library(imgui_test_engine STATIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_capture_tool.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_context.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_coroutine.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_engine.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_exporters.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_perftool.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_ui.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_utils.cpp
+    )
+    add_library(imgui_test_engine::imgui_test_engine ALIAS imgui_test_engine)
+
+    target_include_directories(imgui_test_engine
+        PUBLIC
+            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test-engine>"
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_capture_tool.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_context.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_coroutine.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_engine.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_exporters.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_perftool.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_ui.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_utils.cpp
+            ${Stb_INCLUDE_DIR}
+    )
+    target_link_libraries(imgui_test_engine PUBLIC imgui::imgui)
+    target_compile_features(imgui_test_engine PUBLIC cxx_std_11)
+    target_compile_definitions(imgui_test_engine PUBLIC IMGUI_ENABLE_TEST_ENGINE)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC IMGUI_ENABLE_TEST_ENGINE)
+
+    install(
+        TARGETS imgui_test_engine
+        EXPORT imgui_test_engine_target
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+
+    if(NOT IMGUI_SKIP_HEADERS)
+        install(
+            FILES
+                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_capture_tool.h
+                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_context.h
+                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_coroutine.h
+                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_engine.h
+                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_exporters.h
+                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_imconfig.h
+                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_internal.h
+                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_perftool.h
+                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_ui.h
+                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_utils.h
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        )
+    endif()
+
+    include(CMakePackageConfigHelpers)
+    configure_package_config_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/imgui_test_engine-config.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/imgui_test_engine-config.cmake"
+        INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/imgui_test_engine"
+    )
+    install(
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/imgui_test_engine-config.cmake"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/imgui_test_engine"
+    )
+    install(
+        EXPORT imgui_test_engine_target
+        NAMESPACE imgui_test_engine::
+        FILE imgui_test_engine-targets.cmake
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/imgui_test_engine"
     )
 endif()
 
@@ -327,23 +380,6 @@ if(NOT IMGUI_SKIP_HEADERS)
         install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/misc/freetype/imgui_freetype.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
     endif()
 
-    if(IMGUI_TEST_ENGINE)
-        install(
-            FILES
-                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_capture_tool.h
-                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_context.h
-                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_coroutine.h
-                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_engine.h
-                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_exporters.h
-                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_imconfig.h
-                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_internal.h
-                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_perftool.h
-                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_ui.h
-                ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_te_utils.h
-            DESTINATION
-                ${CMAKE_INSTALL_INCLUDEDIR}
-        )
-    endif()
 endif()
 
 set(IMGUI_CONFIG_FIND_DEPS "")
