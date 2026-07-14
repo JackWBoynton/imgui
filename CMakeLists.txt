@@ -108,8 +108,14 @@ if(IMGUI_BUILD_OSX_BINDING)
 endif()
 
 if(IMGUI_BUILD_SDL3_BINDING)
-    find_package(SDL3 CONFIG REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PUBLIC SDL3::SDL3)
+    # Under Emscripten, SDL3 is provided by the sdl3 port via link flags
+    # (--use-port=sdl3), not as a CMake package.
+    if(NOT EMSCRIPTEN)
+        find_package(SDL3 CONFIG REQUIRED)
+        target_link_libraries(${PROJECT_NAME} PUBLIC SDL3::SDL3)
+    else()
+        target_compile_options(${PROJECT_NAME} PUBLIC "--use-port=sdl3")
+    endif()
     target_sources(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/backends/imgui_impl_sdl3.cpp)
 endif()
 
