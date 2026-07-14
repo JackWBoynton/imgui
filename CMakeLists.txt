@@ -171,7 +171,7 @@ if(IMGUI_USE_WCHAR32)
 endif()
 
 if(IMGUI_TEST_ENGINE)
-    find_package(Stb REQUIRED)
+    find_path(Stb_INCLUDE_DIR NAMES stb_image.h REQUIRED)
 
     add_library(imgui_test_engine STATIC
         ${CMAKE_CURRENT_SOURCE_DIR}/test-engine/imgui_capture_tool.cpp
