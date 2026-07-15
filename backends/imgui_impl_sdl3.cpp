@@ -1126,11 +1126,7 @@ static void ImGui_ImplSDL3_ShowWindow(ImGuiViewport* viewport)
     }
 #endif
 
-#ifdef __APPLE__
-    SDL_SetHint(SDL_HINT_WINDOW_ACTIVATE_WHEN_SHOWN, "1"); // Otherwise new window appear under
-#else
     SDL_SetHint(SDL_HINT_WINDOW_ACTIVATE_WHEN_SHOWN, (viewport->Flags & ImGuiViewportFlags_NoFocusOnAppearing) ? "0" : "1");
-#endif
     SDL_ShowWindow(vd->Window);
 }
 
